@@ -1,0 +1,12 @@
+POST https://symmetrical-dollop-w6v6p97g6xqcgq75-3001.app.github.dev/api/ad/
+Content-Type: application/json
+
+{
+  "name": "desarrollador",
+  "descripcion": "desarrollar aplicaciones",
+  "ubicacion": "Buenos Aires",
+  "type": "Presencial",
+  "tiempo": "Part-Time",
+  "empresa": "TechSA",
+  "Fecha": "09/09/2025"
+}
