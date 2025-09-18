@@ -1,0 +1,48 @@
+{
+  "ad": [
+    {
+      "id": "1",
+      "title": "analista",
+      "description": "analizar cosas",
+      "location": "Malvinas",
+      "type": "Remote",
+      "time": "Full-Time",
+      "company": "SYS",
+      "date": "09/09/2025"
+    },
+    {
+      "id": "2",
+      "title": "Desarrollador",
+      "description": "Desarrollar cosas",
+      "location": "CABA",
+      "type": "On-Site",
+      "time": "Part-Time",
+      "company": "TechSA",
+      "date": "10/10/2025"
+    },
+    {
+      "id": "d63e",
+      "title": "Cocinero",
+      "description": "Cocinar comida rica",
+      "location": "China",
+      "type": "Hybrid",
+      "time": "Full-time",
+      "company": "HAlLs",
+      "date": "16/9/2025"
+    }
+  ],
+  "company": [
+    {
+      "id": "1",
+      "name": "TechSA"
+    },
+    {
+      "id": "2",
+      "name": "SYS"
+    },
+    {
+      "id": "58cc",
+      "name": "HAlLs"
+    }
+  ]
+}

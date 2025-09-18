@@ -1,150 +1,133 @@
 const express = require("express");
 const app = express();
-//app.use(express.static('dist'))
-//const cors = require('cors')
+const cors = require("cors");
 
-//app.use(cors())
-
+app.use(express.static("dist"));
+app.use(cors());
 app.use(express.json());
 
-let Empleo = [
-    {
-        id: 1,
-        name: "analista",
-        descripcion: "analizar cosas",
-        ubicacion: "Malvinas",
-        type: "Remote",
-        tiempo: "Full-Time",
-        empresa: "SYS",
-        Fecha: "09/09/2025"
-    },
-];
+let ad = [];
+let Company = [];
 
-    let Company = [
-        {
-            id: 1,
-            name: "TechSA",
-        },
-        {
-            id: 2,
-            name: "SYS",
-        }
-    ];
+// ---------------- AD ----------------
 
-app.get("/api/Ad", (request, response) => {
-    if (Empleo) {
-        response.json(Empleo);
-    } else {
-        response.status(404).end();
-    }
+app.get("/api/ad", (request, response) => {
+  response.json(ad);
 });
 
-app.get("/api/Ad/:id", (request, response) => {
-    const id = Number(request.params.id);
-    const empleo = Empleo.find((empleo) => empleo.id === id);
+app.get("/api/ad/:id", (request, response) => {
+  const id = Number(request.params.id);
+  const foundAd = ad.find((a) => a.id === id);
 
-    if (empleo) {
-        response.json(empleo);
-    } else {
-        response.status(404).end();
-    }
+  if (foundAd) {
+    response.json(foundAd);
+  } else {
+    response.status(404).end();
+  }
 });
 
 app.delete("/api/ad/:id", (request, response) => {
-    const id = Number(request.params.id);
-    Empleo = Empleo.filter((empleo) => empleo.id !== id);
+  const id = Number(request.params.id);
+  ad = ad.filter((a) => a.id !== id);
 
-    response.status(204).end();
+  response.status(204).end();
 });
 
 const generateId = () => {
-    const maxId = Empleo.length > 0 ? Math.max(...Empleo.map((n) => n.id)) : 0;
-    return maxId + 1;
+  const maxId = ad.length > 0 ? Math.max(...ad.map((n) => n.id)) : 0;
+  return maxId + 1;
 };
 
 app.post("/api/ad", (request, response) => {
-    const body = request.body;
+  const body = request.body;
 
-    if (!body.name || !body.descripcion || !body.ubicacion || !body.type || !body.tiempo || !body.empresa || !body.Fecha) {
-        return response.status(400).json({
-            error: "All fields are required",
-        });
-    }
+  if (
+    !body.title ||
+    !body.description ||
+    !body.location ||
+    !body.type ||
+    !body.time ||
+    !body.company ||
+    !body.date
+  ) {
+    return response.status(400).json({
+      error: "All fields are required",
+    });
+  }
 
-    const empleo = {
-        id: generateId(),
-        name: body.name,
-        descripcion: body.descripcion,
-        ubicacion: body.ubicacion,
-        type: body.type,
-        tiempo: body.tiempo,
-        empresa: body.empresa,
-        Fecha: body.Fecha
-    };
+  const newAd = {
+    id: generateId(),
+    title: body.title,
+    description: body.description,
+    location: body.location,
+    type: body.type,
+    time: body.time,
+    company: body.company,
+    date: body.date,
+  };
 
-    Empleo = Empleo.concat(empleo);
+  ad = ad.concat(newAd);
 
-    response.json(empleo);
+  response.json(newAd);
 });
 
+// ---------------- COMPANY ----------------
 
 app.get("/api/company", (request, response) => {
-    if (Company) {
-        response.json(Company);
-    } else {
-        response.status(404).end();
-    }
+  response.json(Company);
 });
 
 app.get("/api/company/:id", (request, response) => {
-    const id = Number(request.params.id);
-    const company = Company.find((company) => company.id === id);
+  const id = Number(request.params.id);
+  const foundCompany = Company.find((c) => c.id === id);
 
-    if (company) {
-        response.json(company);
-    } else {
-        response.status(404).end();
-    }
+  if (foundCompany) {
+    response.json(foundCompany);
+  } else {
+    response.status(404).end();
+  }
 });
 
 app.delete("/api/company/:id", (request, response) => {
-    const id = Number(request.params.id);
-    Company = Company.filter((company) => company.id !== id);
+  const id = Number(request.params.id);
+  Company = Company.filter((c) => c.id !== id);
 
-    response.status(204).end();
+  response.status(204).end();
 });
 
 const generateCompanyId = () => {
-    const maxId = Company.length > 0 ? Math.max(...Company.map((n) => n.id)) : 0;
-    return maxId + 1;
+  const maxId = Company.length > 0 ? Math.max(...Company.map((n) => n.id)) : 0;
+  return maxId + 1;
 };
 
 app.post("/api/company", (request, response) => {
-    const body = request.body;
+  const body = request.body;
 
-    if (!body.name) {
-        return response.status(400).json({
-            error: "Name field is required",
-        });
-    }
-    if (Company.find((Company) => Company.name === body.name)) {
+  if (!body.name) {
+    return response.status(400).json({
+      error: "Name field is required",
+    });
+  }
+
+  if (Company.find((c) => c.name === body.name)) {
     return response.status(400).json({
       error: "name must be unique",
     });
   }
 
-    const company = {
-        id: generateCompanyId(),
-        name: body.name
-    };
+  const newCompany = {
+    id: generateCompanyId(),
+    name: body.name,
+  };
 
-    Company = Company.concat(company);
+  Company = Company.concat(newCompany);
 
-    response.json(company);
+  response.json(newCompany);
 });
 
+// ---------------- SERVER ----------------
 
-const PORT = process.env.PORT || 3001
+const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
+  console.log(`Server running on port ${PORT}`);
 });
