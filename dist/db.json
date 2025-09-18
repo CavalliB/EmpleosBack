@@ -29,6 +29,16 @@
       "time": "Full-time",
       "company": "HAlLs",
       "date": "16/9/2025"
+    },
+    {
+      "id": null,
+      "title": "Streamer",
+      "description": "no hacer mucho",
+      "location": "Palermo",
+      "type": "Remote",
+      "time": "Freelance",
+      "company": "Steam",
+      "date": "18/9/2025"
     }
   ],
   "company": [
@@ -43,6 +53,10 @@
     {
       "id": "58cc",
       "name": "HAlLs"
+    },
+    {
+      "id": null,
+      "name": "Steam"
     }
   ]
 }
