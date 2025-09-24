@@ -1,56 +1,49 @@
+require("dotenv").config();
+
 const express = require("express");
-const fs = require("fs");
 const cors = require("cors");
+const { createClient } = require("@supabase/supabase-js");
 
 const app = express();
 app.use(express.static("dist"));
 app.use(cors());
 app.use(express.json());
 
-const DB_FILE = "./dist/db.json";
-
-// Leer db.json
-const readDB = () => {
-  try {
-    const data = fs.readFileSync(DB_FILE, "utf-8");
-    return JSON.parse(data);
-  } catch (err) {
-    // Si no existe db.json, inicializamos vacío
-    return { ad: [], company: [] };
-  }
-};
-
-// Guardar en db.json
-const writeDB = (data) => {
-  fs.writeFileSync(DB_FILE, JSON.stringify(data, null, 2));
-};
+const supabase = createClient(
+  process.env.SUPABASE_URL,
+  process.env.SUPABASE_SERVICE_ROLE_KEY 
+);
 
 // ---------------- AD ----------------
 
-app.get("/api/ad", (req, res) => {
-  const db = readDB();
-  res.json(db.ad);
+app.get("/api/ad", async (req, res) => {
+  const { data, error } = await supabase.from("ad").select("*");
+  if (error) return res.status(500).json({ error: error.message });
+  res.json(data);
 });
 
-app.get("/api/ad/:id", (req, res) => {
-  const db = readDB();
-  const id = Number(req.params.id);
-  const foundAd = db.ad.find((a) => a.id === id);
+app.get("/api/ad/:id", async (req, res) => {
+  const { data, error } = await supabase
+    .from("ad")
+    .select("*")
+    .eq("id", req.params.id)
+    .single();
 
-  if (foundAd) res.json(foundAd);
-  else res.status(404).end();
+  if (error && error.code === "PGRST116") return res.status(404).end();
+  if (error) return res.status(500).json({ error: error.message });
+
+  res.json(data);
 });
 
-app.delete("/api/ad/:id", (req, res) => {
-  const db = readDB();
-  const id = Number(req.params.id);
-  db.ad = db.ad.filter((a) => a.id !== id);
-  writeDB(db);
+
+app.delete("/api/ad/:id", async (req, res) => {
+  const { error } = await supabase.from("ad").delete().eq("id", req.params.id);
+  if (error) return res.status(500).json({ error: error.message });
   res.status(204).end();
 });
 
-app.post("/api/ad", (req, res) => {
-  const db = readDB();
+
+app.post("/api/ad", async (req, res) => {
   const body = req.body;
 
   if (
@@ -65,65 +58,74 @@ app.post("/api/ad", (req, res) => {
     return res.status(400).json({ error: "All fields are required" });
   }
 
-  const newAd = {
-    id: db.ad.length > 0 ? Math.max(...db.ad.map((a) => a.id)) + 1 : 1,
-    ...body,
-  };
+  const { data, error } = await supabase.from("ad").insert([body]).select();
+  if (error) return res.status(500).json({ error: error.message });
 
-  db.ad.push(newAd);
-  writeDB(db);
-  res.json(newAd);
+  res.json(data[0]);
 });
 
 // ---------------- COMPANY ----------------
 
-app.get("/api/company", (req, res) => {
-  const db = readDB();
-  res.json(db.company);
+
+app.get("/api/company", async (req, res) => {
+  const { data, error } = await supabase.from("company").select("*");
+  if (error) return res.status(500).json({ error: error.message });
+  res.json(data);
 });
 
-app.get("/api/company/:id", (req, res) => {
-  const db = readDB();
-  const id = Number(req.params.id);
-  const foundCompany = db.company.find((c) => c.id === id);
+app.get("/api/company/:id", async (req, res) => {
+  const { data, error } = await supabase
+    .from("company")
+    .select("*")
+    .eq("id", req.params.id)
+    .single();
 
-  if (foundCompany) res.json(foundCompany);
-  else res.status(404).end();
+  if (error && error.code === "PGRST116") return res.status(404).end();
+  if (error) return res.status(500).json({ error: error.message });
+
+  res.json(data);
 });
 
-app.delete("/api/company/:id", (req, res) => {
-  const db = readDB();
-  const id = Number(req.params.id);
-  db.company = db.company.filter((c) => c.id !== id);
-  writeDB(db);
+app.delete("/api/company/:id", async (req, res) => {
+  const { error } = await supabase
+    .from("company")
+    .delete()
+    .eq("id", req.params.id);
+
+  if (error) return res.status(500).json({ error: error.message });
   res.status(204).end();
 });
 
-app.post("/api/company", (req, res) => {
-  const db = readDB();
+
+app.post("/api/company", async (req, res) => {
   const body = req.body;
 
   if (!body.name) {
     return res.status(400).json({ error: "Name field is required" });
   }
 
-  if (db.company.find((c) => c.name === body.name)) {
+  // Validar unicidad
+  const { data: existing, error: errorExisting } = await supabase
+    .from("company")
+    .select("*")
+    .eq("name", body.name)
+    .maybeSingle();
+
+  if (errorExisting) return res.status(500).json({ error: errorExisting.message });
+  if (existing) {
     return res.status(400).json({ error: "Name must be unique" });
   }
 
-  const newCompany = {
-    id:
-      db.company.length > 0 ? Math.max(...db.company.map((c) => c.id)) + 1 : 1,
-    name: body.name,
-  };
+  const { data, error } = await supabase
+    .from("company")
+    .insert([{ name: body.name }])
+    .select();
 
-  db.company.push(newCompany);
-  writeDB(db);
-  res.json(newCompany);
+  if (error) return res.status(500).json({ error: error.message });
+  res.json(data[0]);
 });
 
 // ---------------- SERVER ----------------
-
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
