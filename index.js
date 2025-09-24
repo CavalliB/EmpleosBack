@@ -17,7 +17,16 @@ const supabase = createClient(
 // ---------------- AD ----------------
 
 app.get("/api/ad", async (req, res) => {
-  const { data, error } = await supabase.from("ad").select("*");
+  const { data, error } = await supabase.from("ad").select(`
+    id,
+    title,
+    description,
+    location,
+    type,
+    time,
+    date,
+    company:company_id (name)
+  `);// accede a la tabla company y trae el name
   if (error) return res.status(500).json({ error: error.message });
   res.json(data);
 });
