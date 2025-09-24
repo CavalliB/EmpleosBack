@@ -25,12 +25,17 @@ app.get("/api/ad", async (req, res) => {
     type,
     time,
     date,
-    company:company_id (name)
+    company (name)
   `);// accede a la tabla company y trae el name
   if (error) return res.status(500).json({ error: error.message });
-  res.json(data);
-});
 
+  const ads = data.map(ad => ({
+  ...ad,
+  company: ad.company?.name?.trim() || null
+}));
+  res.json(ads);
+});
+                                                                        
 app.get("/api/ad/:id", async (req, res) => {
   const { data, error } = await supabase
     .from("ad")
