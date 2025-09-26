@@ -58,24 +58,84 @@ app.delete("/api/ad/:id", async (req, res) => {
 
 
 app.post("/api/ad", async (req, res) => {
-  const body = req.body;
+  const { title, description, location, type, time, company, date } = req.body;
 
-  if (
-    !body.title ||
-    !body.description ||
-    !body.location ||
-    !body.type ||
-    !body.time ||
-    !body.company ||
-    !body.date
-  ) {
+  if (!title || !description || !location || !type || !time || !company || !date) {
     return res.status(400).json({ error: "All fields are required" });
   }
 
-  const { data, error } = await supabase.from("ad").insert([body]).select();
-  if (error) return res.status(500).json({ error: error.message });
+  try {
+    // 1. Buscar si la empresa ya existe
+    let { data: existingCompany, error: searchError } = await supabase
+      .from("company")
+      .select("id")
+      .eq("name", company.trim())
+      .maybeSingle();
 
-  res.json(data[0]);
+    if (searchError) {
+      return res.status(500).json({ error: searchError.message });
+    }
+
+    let companyId;
+
+    if (existingCompany) {
+      // 2a. Si existe, usar su ID
+      companyId = existingCompany.id;
+    } else {
+      // 2b. Si no existe, crear nueva empresa
+      const { data: newCompany, error: createCompanyError } = await supabase
+        .from("company")
+        .insert([{ name: company.trim() }])
+        .select("id")
+        .single();
+
+      if (createCompanyError) {
+        return res.status(500).json({ error: createCompanyError.message });
+      }
+console.log(companyId)
+
+      companyId = newCompany.id;
+    }
+console.log(companyId)
+    // 3. Crear el anuncio con el company_id
+    const { data: newAd, error: createAdError } = await supabase
+      .from("ad")
+      .insert([{
+        title,
+        description,
+        location,
+        type,
+        time,
+        company: companyId, // Aquí guardamos el ID, no el nombre
+        date
+      }])
+      .select(`
+        id,
+        title,
+        description,
+        location,
+        type,
+        time,
+        date,
+        company (name)
+      `)
+      .single();
+
+    if (createAdError) {
+      return res.status(500).json({ error: createAdError.message });
+    }
+
+    // 4. Formatear la respuesta para que coincida con el formato esperado por el frontend
+    const formattedAd = {
+      ...newAd,
+      company: newAd.company?.name || null
+    };
+
+    res.json(formattedAd);
+
+  } catch (error) {
+    res.status(500).json({ error: "Internal server error" });
+  }
 });
 
 // ---------------- COMPANY ----------------
