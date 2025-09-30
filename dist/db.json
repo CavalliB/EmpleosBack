@@ -31,14 +31,24 @@
       "date": "16/9/2025"
     },
     {
-      "id": null,
-      "title": "Streamer",
-      "description": "no hacer mucho",
-      "location": "Palermo",
-      "type": "Remote",
-      "time": "Freelance",
-      "company": "Steam",
-      "date": "18/9/2025"
+      "id": "32aa",
+      "title": "asd",
+      "description": "asd",
+      "location": "asd",
+      "type": "On-Site",
+      "time": "Full-time",
+      "company": "SYS",
+      "date": "9/25/2025"
+    },
+    {
+      "id": "cefb",
+      "title": "kjsbdck",
+      "description": "jb",
+      "location": "jcwi",
+      "type": "On-Site",
+      "time": "Full-time",
+      "company": "jdqwih",
+      "date": "9/25/2025"
     }
   ],
   "company": [
@@ -55,8 +65,8 @@
       "name": "HAlLs"
     },
     {
-      "id": null,
-      "name": "Steam"
+      "id": "28c8",
+      "name": "jdqwih"
     }
   ]
 }
